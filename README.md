@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # KINETIC (working title)
 
 Browser-based arena FPS. **Phase 3: weapons & combat feel** on top of the Phase 2 online multiplayer
@@ -91,3 +92,5 @@ client/            Three.js + Vite browser client
 
 Key files: `shared/src/protocol.ts` (wire format), `server/src/room.ts` (simulation, combat, match flow),
 `server/src/matchmaker.ts`, `client/src/net.ts`, `client/src/game.ts` (prediction/interpolation).
+# game
+12c713cb496dd497b2d58ee0ee06e13f9264c66b
