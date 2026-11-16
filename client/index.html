@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="theme-color" content="#0b0e14" />
+    <title>KINETIC — Arena Prototype</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <canvas id="game"></canvas>
+
+    <div id="hud" class="hidden">
+      <div id="crosshair" class="full"><i class="t"></i><i class="b"></i><i class="l"></i><i class="r"></i><i class="dot"></i></div>
+      <div id="hitmarker"><i></i><i></i><i></i><i></i></div>
+      <div id="target-lock" class="hidden">
+        <div class="lock-bracket tl"></div>
+        <div class="lock-bracket tr"></div>
+        <div class="lock-bracket bl"></div>
+        <div class="lock-bracket br"></div>
+        <div class="lock-diamond"></div>
+        <div id="lock-label" class="lock-label">LOCKED</div>
+      </div>
+      <div id="scope" class="hidden"></div>
+      <div id="vignette"></div>
+      <div id="dmg-indicators"></div>
+      <div id="dmg-numbers"></div>
+
+      <div id="topbar">
+        <div id="score-you">YOU 0</div>
+        <div id="timer">8:00</div>
+        <div id="score-leader"></div>
+      </div>
+      <div id="killfeed"></div>
+      <div id="center-msg"></div>
+
+      <div id="health" class="panel">
+        <div class="label">HP</div>
+        <div class="bar"><div id="health-fill"></div></div>
+        <div id="health-num">100</div>
+      </div>
+
+      <div id="ammo" class="panel">
+        <div id="weapon-name"></div>
+        <div class="count"><span id="ammo-mag">0</span><span id="ammo-max"> / 0</span></div>
+        <div id="reload-bar"><div id="reload-fill"></div></div>
+      </div>
+      <div id="slots"></div>
+      <div id="stats"><span id="net-info"></span> FPS <span id="fps">0</span> · <span id="speed">0</span> m/s<span id="ping"></span><span id="aa-hud" class="aa-hud"></span></div>
+      <button id="btn-lock" class="hud-lock-btn" type="button" aria-label="Toggle Aim Lock">
+        <span class="icon">◎</span>
+        <span id="btn-lock-text">LOCK [E]</span>
+      </button>
+
+      <div id="scoreboard" class="hidden panel">
+        <h2>Free For All</h2>
+        <table>
+          <thead><tr><th>#</th><th>Player</th><th>K</th><th>D</th><th>K/D</th></tr></thead>
+          <tbody id="sb-body"></tbody>
+        </table>
+      </div>
+
+      <div id="death" class="hidden">
+        <div class="title">ELIMINATED</div>
+        <div id="death-by"></div>
+        <div id="death-timer"></div>
+        <div id="death-loadout"></div>
+      </div>
+    </div>
+
+    <div id="menu" class="overlay">
+      <div class="menu-card">
+        <h1>KINETIC</h1>
+        <div class="tagline">Arena FPS · Online free-for-all · Play with friends</div>
+
+        <div id="lobby">
+          <div class="name-row">
+            <label for="player-name">Name</label>
+            <input id="player-name" maxlength="16" placeholder="Player" autocomplete="off" spellcheck="false" />
+          </div>
+          <div class="loadout">
+            <h3>Primary weapon</h3>
+            <div id="weapon-picks" class="weapon-picks"></div>
+            <div class="loadout-note">+ Pike Pistol · Edge Knife</div>
+          </div>
+          <div class="name-row">
+            <label for="map-select">Map</label>
+            <select id="map-select"></select>
+            <span class="loadout-note">for private rooms &amp; practice · Quick Play rotates maps</span>
+          </div>
+          <div class="buttons">
+            <button id="btn-quick" class="primary">QUICK PLAY</button>
+            <button id="btn-create">CREATE PRIVATE ROOM</button>
+          </div>
+          <div class="buttons join-row">
+            <input id="room-code" maxlength="5" placeholder="ROOM CODE" autocomplete="off" spellcheck="false" />
+            <button id="btn-join">JOIN</button>
+            <button id="btn-offline">PRACTICE OFFLINE</button>
+          </div>
+        </div>
+
+        <div id="paused" class="hidden">
+          <div id="room-line" class="room-line"></div>
+          <div class="buttons">
+            <button id="btn-resume" class="primary">RESUME</button>
+            <button id="btn-copy-invite">COPY INVITE LINK</button>
+            <button id="btn-restart">RESTART MATCH</button>
+            <button id="btn-leave">LEAVE</button>
+          </div>
+        </div>
+        <div id="menu-status" class="status"></div>
+        <div class="cols">
+          <div class="settings">
+            <h3>Settings</h3>
+            <label>Sensitivity <span id="v-sens"></span><input id="set-sens" type="range" min="0.1" max="4" step="0.05" /></label>
+            <label class="touch-only">Touch look sensitivity <span id="v-touch-sens"></span><input id="set-touch-sens" type="range" min="0.3" max="3" step="0.05" /></label>
+            <label>ADS sensitivity × <span id="v-ads"></span><input id="set-ads" type="range" min="0.3" max="1.5" step="0.05" /></label>
+            <label>Aim Lock (Sticky Aim) <span id="v-sticky-status" class="status-pill on">ON</span><input id="set-sticky-aim" type="checkbox" /></label>
+            <label>Aim Lock Speed <span id="v-sticky-speed"></span><input id="set-sticky-speed" type="range" min="0.5" max="2.0" step="0.1" /></label>
+            <label>Auto-Lock on ADS <input id="set-sticky-ads" type="checkbox" /></label>
+            <label>Soft Aim Assist <span id="v-aa-status" class="status-pill on">ON</span><input id="set-aim-assist" type="checkbox" /></label>
+            <label>Soft Assist Strength <span id="v-aa-strength"></span><input id="set-aim-assist-strength" type="range" min="0.1" max="1" step="0.05" /></label>
+            <label>Field of view <span id="v-fov"></span><input id="set-fov" type="range" min="70" max="120" step="1" /></label>
+            <label>Volume <span id="v-vol"></span><input id="set-vol" type="range" min="0" max="1" step="0.05" /></label>
+            <label>Practice bots <span id="v-bots"></span><input id="set-bots" type="range" min="1" max="12" step="1" /></label>
+          </div>
+          <div class="controls">
+            <h3>Controls</h3>
+            <div class="touch-help touch-only">
+              <div><b>Left thumb</b> — drag anywhere on the left to move</div>
+              <div><b>Right thumb</b> — drag to look · hold <b>FIRE</b> and drag to aim while shooting</div>
+              <div><b>AIM</b> toggles sights · <b>SLIDE</b> while running · <b>⇄</b> swap weapon · <b>🔪</b> knife</div>
+              <div><b>☰</b> scoreboard · <b>II</b> pause · play in <b>landscape</b></div>
+            </div>
+            <div><kbd>WASD</kbd> Move</div>
+            <div><kbd>Space</kbd> Jump (hold to bunny-hop)</div>
+            <div><kbd>Shift</kbd>/<kbd>C</kbd> Crouch · tap while running to <b>slide</b></div>
+            <div><kbd>LMB</kbd> Fire · <kbd>RMB</kbd> Aim down sights</div>
+            <div><kbd>E</kbd> Lock / Unlock Target (Sticky Aim)</div>
+            <div><kbd>R</kbd> Reload · <kbd>1–3</kbd>/<kbd>Wheel</kbd>/<kbd>Q</kbd> Weapons · <kbd>V</kbd> Knife</div>
+            <div><kbd>H</kbd> Toggle Soft Assist</div>
+            <div>While dead: <kbd>1–4</kbd> change primary</div>
+            <div><kbd>Tab</kbd> Scoreboard · <kbd>Esc</kbd> Pause</div>
+            <div class="tip">Slide → jump keeps your momentum.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="rotate-hint"><div>↻</div><div>Rotate your phone to landscape</div></div>
+
+    <div id="end" class="overlay hidden">
+      <div class="menu-card">
+        <h1 id="end-title">VICTORY</h1>
+        <div class="tagline" id="end-sub"></div>
+        <table class="end-table">
+          <thead><tr><th>#</th><th>Player</th><th>K</th><th>D</th><th>K/D</th></tr></thead>
+          <tbody id="end-body"></tbody>
+        </table>
+        <div class="buttons"><button id="btn-again" class="primary">PLAY AGAIN</button></div>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

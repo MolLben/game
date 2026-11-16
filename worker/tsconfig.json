@@ -1,0 +1,5 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": { "lib": ["ES2022"], "types": ["@cloudflare/workers-types"] },
+  "include": ["src", "../server/src/room.ts", "../server/src/player.ts", "../server/src/session.ts", "../server/src/socket.ts", "../shared/src"]
+}

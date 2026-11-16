@@ -1,0 +1,25 @@
+{
+  "name": "kinetic",
+  "private": true,
+  "version": "0.1.0",
+  "description": "KINETIC — browser arena FPS (working title)",
+  "workspaces": [
+    "shared",
+    "client",
+    "server",
+    "worker"
+  ],
+  "scripts": {
+    "dev": "concurrently -k -n server,client -c yellow,cyan \"npm run dev -w server\" \"npm run dev -w client\"",
+    "dev:client": "npm run dev -w client",
+    "dev:server": "npm run dev -w server",
+    "build": "npm run build -w client",
+    "start": "npm run start -w server",
+    "typecheck": "tsc -p shared --noEmit && tsc -p client --noEmit && tsc -p server --noEmit && tsc -p worker --noEmit",
+    "deploy": "npm run build -w client && npm run deploy -w worker"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0",
+    "concurrently": "^9.0.0"
+  }
+}
